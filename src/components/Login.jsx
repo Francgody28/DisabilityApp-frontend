@@ -1,4 +1,3 @@
-// components/Login.jsx
 import { useState } from 'react';
 
 export default function Login({ onLoginSuccess }) {
@@ -26,7 +25,7 @@ export default function Login({ onLoginSuccess }) {
       .then(data => {
         if (data.message) {
           alert(data.message);
-          onLoginSuccess(); // triggers services page load
+          onLoginSuccess();
         } else {
           setError(data.error || 'Login failed.');
         }

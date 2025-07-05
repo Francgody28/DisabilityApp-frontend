@@ -59,7 +59,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>© 2025 Disability Connect | Designed by Ancho 28</p>
+        <p>© 2025 Disability Connect | Designed by Frank 28</p>
       </footer>
     </div>
   );

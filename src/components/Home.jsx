@@ -1,4 +1,3 @@
-// src/components/Home.jsx
 import Login from './Login';
 import Register from './Register';
 

@@ -1,4 +1,3 @@
-// components/AdminDashboard.jsx
 export default function AdminDashboard() {
   return (
     <section className="section">

@@ -1,11 +1,10 @@
-// Location.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix leaflet marker icons:
+// Fix leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png',
@@ -33,13 +32,31 @@ function Location() {
 
   const [locations, setLocations] = useState([]);
 
+  const countries = ['Tanzania', 'Kenya', 'Uganda', 'Rwanda', 'Burundi', 'South Africa'];
+  const tanzaniaRegions = [
+    'Arusha', 'Dar es Salaam', 'Dodoma', 'Geita', 'Iringa', 'Kagera', 'Katavi', 'Kigoma',
+    'Kilimanjaro', 'Lindi', 'Manyara', 'Mara', 'Mbeya', 'Morogoro', 'Mtwara', 'Mwanza',
+    'Njombe', 'Pwani', 'Rukwa', 'Ruvuma', 'Shinyanga', 'Simiyu', 'Singida', 'Tabora',
+    'Tanga', 'Songwe'
+  ];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLocationData({ ...locationData, [name]: value });
+
+    // Reset city if country is changed from Tanzania to something else
+    if (name === 'country' && value !== 'Tanzania') {
+      setLocationData((prev) => ({ ...prev, country: value, city: '' }));
+    } else {
+      setLocationData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleMapClick = ({ lat, lng }) => {
-    setLocationData({ ...locationData, latitude: lat, longitude: lng });
+    setLocationData((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
   };
 
   const fetchLocations = async () => {
@@ -58,7 +75,6 @@ function Location() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare data to match backend (snake_case)
     const postData = {
       full_name: locationData.fullName,
       country: locationData.country,
@@ -68,7 +84,6 @@ function Location() {
       longitude: parseFloat(locationData.longitude),
     };
 
-    // Validation: all fields filled
     if (
       !postData.full_name ||
       !postData.country ||
@@ -82,12 +97,10 @@ function Location() {
     }
 
     try {
-      console.log('Sending location:', postData);
       const response = await axios.post('http://127.0.0.1:8000/api/location/', postData);
-     console.log('Saved successfully:', response.data); // <-- now it's used
+      console.log('Saved successfully:', response.data);
       fetchLocations();
 
-      // Reset form
       setLocationData({
         fullName: '',
         country: '',
@@ -127,16 +140,49 @@ function Location() {
         />
 
         <label>Country:</label>
-        <input
-          type="text"
+        <select
           name="country"
           value={locationData.country}
           onChange={handleChange}
           required
-        />
+        >
+          <option value="">-- Select Country --</option>
+          {countries.map((country) => (
+            <option key={country} value={country}>
+              {country}
+            </option>
+          ))}
+        </select>
 
-        <label>City:</label>
-        <input type="text" name="city" value={locationData.city} onChange={handleChange} required />
+        {locationData.country === 'Tanzania' ? (
+          <>
+            <label>Region:</label>
+            <select
+              name="city"
+              value={locationData.city}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select Region --</option>
+              {tanzaniaRegions.map((region) => (
+                <option key={region} value={region}>
+                  {region}
+                </option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <>
+            <label>City:</label>
+            <input
+              type="text"
+              name="city"
+              value={locationData.city}
+              onChange={handleChange}
+              required
+            />
+          </>
+        )}
 
         <label>Street:</label>
         <input
@@ -175,7 +221,7 @@ function Location() {
             <tr>
               <th>Full Name</th>
               <th>Country</th>
-              <th>City</th>
+              <th>City/Region</th>
               <th>Street</th>
               <th>Latitude</th>
               <th>Longitude</th>
